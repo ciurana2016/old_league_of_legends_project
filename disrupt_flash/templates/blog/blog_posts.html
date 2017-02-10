@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+	
+	<section id="blog" class="list_posts">
+		<h2>All the blog posts:</h2>
+		<ul>
+			{% if object_list %}
+				{% for post in object_list %}
+					<li>
+						<h4>
+							<a href="{% url 'blog_post' post.slug %}">
+								{{post.title}}
+							</a>
+						</h4>
+					</li>
+				{% endfor %}
+			{% else %}
+				No blog posts yet !
+			{% endif %}
+		</ul>		
+	</section>
+
+{% endblock content %}

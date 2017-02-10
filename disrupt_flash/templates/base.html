@@ -1,0 +1,73 @@
+{% load static %}{% spaceless %}<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Disrupt flash</title>
+
+		{# Fav #}
+		<link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon.png' %}">
+		
+		{# this affects strokedahs ! svg circle #}
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" > 
+		<meta name="theme-color" content="#00ADB5">
+		
+		{# The search things #}
+		<meta name="title" content="disruptflash.com">
+		<meta name="description" content="Disrupt Flash! is a website created to help you and your teammates track summoner spells.">
+		<meta name="keywords" content="track summoner spells, lol, league of legends, how to track summoner spells, timing spells, timer spells, time summoner spells, timer summoner spells, flash, track flash, flash track, time flash, lol flash timer, flash timer lol, how to time flash lol, how to time summoner spells lol">
+		
+		{# Facebook #}
+		<meta property="og:description" content="Disrupt Flash! is a website created to help you and your teammates track summoner spells.">
+		<meta property="og:title" content="Disrupt Flash">
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="" >
+		<meta property="og:site_name" content="disruptflash.com" >
+
+		{# Google verification #}
+		<meta name="google-site-verification" content="8ksyjvhoczxyv5TWu1tKU1XzTH0XD630bEqL9vHwNEo" />
+
+		{# STYLE #}
+		{# <link rel="stylesheet" href="{% static "css/base.css" %}"> #}
+		<style>body,ul{margin:0;padding:0}a,input,button{color:inherit;font-size:inherit;text-decoration:none}li{list-style-type:none}h1,h2,h3,h4,h5,h6{margin:0}#nochrome{background:tomato;box-sizing:border-box;font-size:25px;padding:26px;position:fixed;text-align:center;top:0px;left:0px;width:100%}html{position:relative;min-height:100%}body{background:#EEEEEE;color:#222831;font-family:sans-serif;font-size:18px;height:100%;margin:0 0 309px}footer{background:#393E46;color:white;font-weight:100;letter-spacing:.5px;padding:40px 0;position:absolute;bottom:0px;width:100%}footer .center{margin:auto;width:419px}footer #site{margin-bottom:40px}footer #site a{margin-right:20px;text-decoration:underline}footer #site a:hover{color:#00ADB5}footer #legal{line-height:24px}header{background:#00ADB5;padding:20px;text-align:center}section#start{padding:80px 0;text-align:center}section#start form{display:inline-block;text-align:left}section#start form [class*="region"]{width:120px}section#start form [class*="summoners"]{width:200px}section#start form .textrow div{display:inline-block}section#start form .inputrow{color:#6e6e6e;margin-top:10px}section#start form .inputrow .region-input,section#start form .inputrow .summoners-input,section#start form .inputrow button{display:inline-block}section#start form .inputrow .region-input{position:relative}section#start form .inputrow .region-input .current{display:inline-block;width:113px}section#start form .inputrow .region-input .current .txt{display:inline-block}section#start form .inputrow .region-input .current:hover .triangle{top:8px}section#start form .inputrow .region-input .current .triangle{border-style:solid;border-width:10px 7.5px 0 7.5px;border-color:#6e6e6e transparent transparent transparent;display:inline-block;float:right;margin-left:4px;position:relative;top:5px;transition:top 0.35s;width:0;height:0}section#start form .inputrow .region-input ul{display:none;position:absolute;top:60px;overflow:hidden;height:auto;width:294px}section#start form .inputrow .region-input ul li{display:inline-block;float:left;margin-bottom:10px;width:25%}section#start form .inputrow .region-input ul li.c{color:#6464c8}section#start form .inputrow .region-input ul li:nth-last-child(-n+3){margin-bottom:0px}section#start form .inputrow .region-input ul li:hover{color:#6868c9}section#start form .inputrow button{margin-left:7px}section#start form .inputrow .current,section#start form .inputrow .summoners-input,section#start form .inputrow button,section#start form .inputrow ul{background:white;border:1px solid #e6e6e6;border-radius:3px;box-shadow:0px 2px 0px #cdcdcd;box-sizing:border-box;cursor:pointer;padding:10px 16px;letter-spacing:.67px;height:43px}section#start form .inputrow .current:focus,section#start form .inputrow .summoners-input:focus,section#start form .inputrow button:focus,section#start form .inputrow ul:focus{outline:none}@keyframes rotate_{to{transform:rotate(360deg)}}section#start form .inputrow i.thinking{display:inline-block;border-radius:50%;border-left:2px solid #9e9e9e;border-top:2px solid #1e1e1e;border-bottom:2px solid #1e1e1e;border-right:2px solid #9e9e9e;height:13px;width:13px;position:relative;top:3px;animation:rotate_ 2s linear infinite}section#what .center{margin:auto;margin-bottom:120px;width:419px}section#what .center h2{margin-bottom:20px}section#what .center a{color:#00ADB5}section#what .center #video{border:1px solid #393E46;height:234px;width:419px}section#what .center #video iframe{width:100%;height:100%}section#room{padding:80px 0;margin-bottom:40px}section#room .center{text-align:center;margin:auto;width:510px}section#room .no_start{border:1px solid #393E46;box-sizing:border-box;text-align:left;padding:30px;line-height:27px;height:306px;width:510px}section#room .no_start h3{margin-bottom:20px}section#room .no_start button{background:white;border:1px solid #e6e6e6;border-radius:3px;box-shadow:0px 2px 0px #cdcdcd;box-sizing:border-box;cursor:pointer;padding:10px 16px;letter-spacing:.67px;height:43px}section#room .no_start button:focus{outline:none}section#room #config{margin-bottom:20px;overflow:hidden;padding-bottom:5px;text-align:left}section#room #config .button{background:white;border:1px solid #e6e6e6;border-radius:3px;box-shadow:0px 2px 0px #cdcdcd;box-sizing:border-box;cursor:pointer;padding:10px 16px;letter-spacing:.67px;height:43px;display:inline-block;float:left;margin-right:10px}section#room #config .button:focus{outline:none}section#room #config .qr svg{display:inline-block;fill:#2e2e2e;height:24px;width:24px}section#room #config .fullscreen{display:none}section#room #config input#voice_toggle{display:none}section#room #config input#voice_toggle:checked ~ label .on{display:block}section#room #config input#voice_toggle:checked ~ label .off{display:none}section#room #config .voice_recognition span svg{fill:#2e2e2e;height:24px;width:24px}section#room #config .voice_recognition span.on{display:none}section#room #config .voice_processing{background:white;border:1px solid #e6e6e6;box-sizing:border-box;border-radius:3px;display:none;padding:10px 16px;margin-top:20px;width:100%}section#room ul.enemy_team{overflow:hidden;width:510px}section#room ul.enemy_team li{display:inline-block;float:left}section#room ul.enemy_team li .img{background-size:cover !important;border:1px solid black;height:100px;width:100px}section#room ul.enemy_team li .spell{cursor:pointer;position:relative}section#room ul.enemy_team li .spell .cd_counter{background:rgba(0,0,0,0.4);box-sizing:border-box;color:white;position:relative;text-align:center;text-shadow:1px 1px 0 black, -1px 1px 0 black, 1px -1px 0 black, -1px -1px 0 black;font-size:40px;line-height:100px;height:100%;width:100%;z-index:10}section#room ul.enemy_team li .spell svg{position:absolute;top:0px;left:0px;width:100%;height:100%}section#room ul.enemy_team li .spell svg circle{fill:none;stroke:rgba(0,0,0,0.6);stroke-width:100%;stroke-dasharray:314;stroke-dashoffset:0;transition:all 1s linear;transform-origin:50% 50%;transform:rotate(90deg) rotateY(180deg)}section#room ul.enemy_team li .spell:hover{box-shadow:inset 0 0 13px rgba(200,200,200,0.5)}section#room ul.enemy_team li .spell:active{box-shadow:inset 0 0 23px 10px rgba(0,0,0,0.8)}section#room .close_room{text-align:left;margin-top:40px}section#room .close_room a{background:white;border:1px solid #e6e6e6;border-radius:3px;box-shadow:0px 2px 0px #cdcdcd;box-sizing:border-box;cursor:pointer;padding:10px 16px;letter-spacing:.67px;height:43px;display:block;text-align:center;margin-top:20px;width:200px}section#room .close_room a:focus{outline:none}.black{background:rgba(0,0,0,0.8);cursor:pointer;display:none;top:0px;left:0px;position:fixed;height:100%;width:100%;z-index:99}.popup{border:1px solid #e6e6e6;border-radius:3px;display:none;left:50%;top:50%;margin-left:-150px;margin-top:-171px;position:fixed;overflow:hidden;z-index:100}.popup .close_me{background:white;box-sizing:border-box;padding:0 24px;text-align:right}.popup .close_me svg{cursor:pointer;display:inline-block;fill:#2e2e2e;position:relative;top:15px;height:39px;width:39px}.popup .qr_img{height:300px;width:300px}section#contact{margin:180px auto;width:400px}section#blog{margin:40px auto;padding-bottom:100px;width:400px}section#blog h2{margin-bottom:20px}section#blog li,section#blog .content{box-sizing:border-box;background:white;border-radius:3px;padding:20px}section#blog li a,section#blog .content a{color:#00ADB5}section#blog.post{width:650px}section#blog.post .content{line-height:24px}section#blog.post .content .social{margin-top:20px}section#blog.post .content .social .circulo{display:inline-block;width:40px;height:40px;line-height:40px;text-align:center;border-radius:50%;cursor:pointer;margin-right:20px;transition:box-shadow .2s}section#blog.post .content .social .circulo[class*="facebook"]{background:#5a5afa}section#blog.post .content .social .circulo[class*="twitter"]{background:#6CDFEA}section#blog.post .content .social .circulo[class*="g-plus"]{background:#E34429}section#blog.post .content .social .circulo svg{position:relative;fill:white;top:2px;height:15px;width:15px}@media (max-width: 510px) and (orientation: landscape){.button.qr{display:none !important}.button.fullscreen{display:inline-block !important}}@media screen and (max-width: 510px){body{font-size:14px;margin:0}header{padding:10px}.center,form,section#contact{box-sizing:border-box;padding:10px;width:100% !important}section#start{padding:10px 0}form .textrow{display:none}form .inputrow{width:100%}section#start form .inputrow .region-input,section#start form .inputrow .summoners-input,section#start form .inputrow button{display:block;width:100%;margin-left:0 !important;margin-bottom:10px}section#start form .inputrow .region-input ul{top:50px}section#what .center #video{height:191px;width:100%}.button.qr{display:none !important}.button.fullscreen{display:inline-block !important}.button,section#room .close_room a,section#start form .inputrow .current,section#start form .inputrow .summoners-input,section#start form .inputrow button,section#start form .inputrow ul{font-size:18px}section#room{padding:10px 0}section#room ul.enemy_team{width:100%}section#room ul.enemy_team li{width:20%}section#room ul.enemy_team li .img{width:calc(100% - 2px);height:65px}section#room ul.enemy_team li .spell .cd_counter{font-size:22px;line-height:58px}section#room ul.enemy_team li .spell svg{display:none}section#room .no_start{width:100%}footer{position:relative}section#blog{width:100% !important;box-sizing:border-box;padding:0 10px;position:relative;margin-bottom:70px}}</style>
+	</head>
+
+	<body>
+		
+		<header>
+			<h1>
+				<a href="{% url 'index' %}">Disrupt Flash!</a>
+			</h1>
+		</header>
+
+		{% block content %}{% endblock content %}
+		
+		<footer>
+			<div class="center">
+				<div id="site">
+					<a href="{% url 'index' %}">Home</a>
+					<a href="{% url 'blog_posts' %}">Blog</a>
+					{# <a href="{% url 'supporters' %}">Supporters</a> #}
+					<a href="{% url 'contact' %}">Contact</a>
+				</div>
+				<div id="legal">Disrupt Flash isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.</div>
+			</div>
+		</footer>
+
+	{# ALL THE JS #}
+	<script>/*Cookies*/function createCookie(c,d,b){if(b){var a=new Date;a.setTime(a.getTime()+864E5*b);b="; expires="+a.toGMTString()}else b="";document.cookie=c+"="+d+b+"; path=/"}function readCookie(c){c+="=";for(var d=document.cookie.split(";"),b=0;b<d.length;b++){for(var a=d[b];" "==a.charAt(0);)a=a.substring(1,a.length);if(0==a.indexOf(c))return a.substring(c.length,a.length)}return null};</script>
+
+	{# CHROME ONLY #}
+	<script>if ( !window.chrome ) document.body.innerHTML+='<div id="nochrome">This website will only work on Google Chrome !</div>'</script>
+
+	{# SOCKET IO JS #}
+	{% block socketjs %}{% endblock socketjs %}
+
+	{# ACTUAL JS FOR PAGES #}
+	{% block javascript %}{% endblock javascript %}
+
+	<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-57176916-4', 'auto');ga('send', 'pageview');</script>
+	</body>
+
+</html>	
+{% endspaceless %}

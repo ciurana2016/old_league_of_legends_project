@@ -1,0 +1,30 @@
+// Reset the html
+body, ul{
+	margin: 0;
+	padding: 0;
+}
+
+a, input, button{
+	color: inherit;
+	font-size: inherit;
+	text-decoration: none;
+}
+
+li{
+	list-style-type: none;
+}
+
+h1,h2,h3,h4,h5,h6{ margin: 0; }
+
+// Only chrome exception
+#nochrome{
+  background: tomato;
+  box-sizing: border-box;
+  font-size: 26px;
+  padding: 20px;
+  position: fixed;
+  text-align: center;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+}

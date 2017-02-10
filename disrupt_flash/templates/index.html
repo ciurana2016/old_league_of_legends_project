@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+	<section id="start">
+		<form action="">
+			<div class="textrow">
+				<div class="region-txt">Region:</div>
+				<div class="summoners-txt">Summoner's name:</div>
+			</div>
+			<div class="inputrow">
+				<div class="region-input">
+					<div class="current">
+						<div class="txt">NA</div> <span class="triangle"></span>
+					</div>
+					<ul>
+						<li>BR</li>
+						<li>EUNE</li>
+						<li>EUW</li>
+						<li>JP</li>
+						<li>KR</li>
+						<li>LAN</li>
+						<li>LAS</li>
+						<li class="c">NA</li>
+						<li>OCE</li>
+						<li>TR</li>
+						<li>RU</li>
+					</ul>
+				</div>
+				<input type="text" class="summoners-input" placeholder="Your LOL name">
+				<button>START</button>
+			</div>
+		</form>
+	</section>
+
+	<section id="what">
+		<div class="center">
+			<h2>What is this website ?</h2>
+			<p>Disrupt Flash! is a website created to help you and your teammates track summoner spells. You can play the next video to see it in action.</p>
+			<div id="video">
+				<iframe src="https://www.youtube.com/embed/NKT2Pmt82Hg" frameborder="0" allowfullscreen>Your browser is too old !</iframe>
+			</div>
+		</div>
+	</section>
+
+{% endblock content %}
+
+{% block javascript %}
+<script>var a=document.querySelector(".current"),b=a.querySelector(".txt"),e=document.querySelector(".region-input ul"),f=e.querySelectorAll("li"),g=0;a.addEventListener("click",function(){0==g?(e.style.display="block",g=1):(e.style.display="none",g=0)});function h(){var d=f[k];d.addEventListener("click",function(){b.innerHTML=d.innerHTML;for(var c=0;c<f.length;c++)f[c].setAttribute("class","");d.setAttribute("class","c");e.style.display="none";g=0})}for(var k=0;k<f.length;k++)h();button=document.querySelector("form button");button.addEventListener("click",function(d){d.preventDefault();this.innerHTML='Loading <i class="thinking"></i>';var c=document.querySelector(".summoners-input").value;data=JSON.stringify({name:c,region:b.innerHTML});post=new XMLHttpRequest;post.open("POST",window.location.origin+"/start/",!0);post.setRequestHeader("X-CSRFToken","{{ csrf_token }}");post.setRequestHeader("Content-type","application/json");post.onreadystatechange=function(){post.readyState==XMLHttpRequest.DONE&&(result=JSON.parse(post.responseText),"403"==result.start?(alert("The summoner was not found"),button.innerHTML="START"):"room_created"==result.start?(alert("This summoner has already created a room, rooms last for 1 hour or unitl the summoner closes it"),button.innerHTML="START"):(createCookie("close_room",result.cookie,.0416),createCookie("last_summoner",c+","+b.innerHTML,365),window.location=window.location.origin+"/r/"+result.start))};post.send(data)});if(readCookie("last_summoner"))for(cookie_data=readCookie("last_summoner").split(","),document.querySelector(".summoners-input").value=cookie_data[0],b.innerHTML=cookie_data[1],k=0;k<f.length;k++)f[k].innerHTML==cookie_data[1]?f[k].setAttribute("class","c"):f[k].setAttribute("class","");</script>
+
+{% comment %}
+	<script>
+		//
+		// Region custom select
+		//
+
+		var region_btn = document.querySelector('.current');
+		var region_txt = region_btn.querySelector('.txt');
+		var region_ul = document.querySelector('.region-input ul');
+		var regions = region_ul.querySelectorAll('li');
+		var region_st = 0;
+
+		// Display regions
+		region_btn.addEventListener('click', function(){
+			if( region_st == 0 ){
+				region_ul.style.display = 'block';
+				region_st = 1;
+			}else{
+				region_ul.style.display = 'none';
+				region_st = 0;
+			}
+		});
+
+		// Select regions
+		var click_region = function(el){
+			el.addEventListener('click', function(){
+				// Change current region
+				region_txt.innerHTML = el.innerHTML;
+				// Change style
+				for( var i=0; i<regions.length; i++ ){
+					regions[i].setAttribute('class','');
+				}
+				el.setAttribute('class','c');
+				// Close ul
+				region_ul.style.display = 'none';
+				region_st = 0;
+			});
+		}
+
+		for( var i=0; i<regions.length; i++ ){
+			click_region(regions[i]);
+		}
+
+		//
+		// Form 
+		//
+
+		button = document.querySelector('form button');
+
+		button.addEventListener('click', function(event){
+			event.preventDefault();
+
+			// We add the  "thinking" spining thing
+			this.innerHTML = 'Loading <i class="thinking"></i>'
+
+			var summoner_name = document.querySelector('.summoners-input').value;
+
+			data = JSON.stringify({
+				'name' : summoner_name,
+				'region' : region_txt.innerHTML
+			});
+
+			post = new XMLHttpRequest();
+			post.open('POST', window.location.origin + '/start/', true);
+			post.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+			post.setRequestHeader("Content-type", "application/json");
+
+			post.onreadystatechange = function() {
+			    if ( post.readyState == XMLHttpRequest.DONE ) {
+			    	result = JSON.parse(post.responseText)
+			    	if ( result['start'] == '403' ){
+			    		alert('The summoner was not found');
+			    		button.innerHTML = 'START';
+			    	}
+			    	else if( result['start'] == 'room_created' ){
+			    		alert('This summoner has already created a room, rooms last for 1 hour or unitl the summoner closes it');
+			    		button.innerHTML = 'START';
+			    	}
+			    	else{
+			    		// Seting cookies 
+			    		// to close room b4 redirecting (1 hour)
+			    		createCookie('close_room',result['cookie'], 0.0416);
+			    		// Summoner name and region (365days)
+			    		createCookie('last_summoner', summoner_name+','+region_txt.innerHTML, 365);
+			    		// Redirect to room
+			    		window.location = window.location.origin + '/r/' + result['start']
+			    	}
+			    }
+			}
+
+			post.send(data);
+
+		});
+
+		//
+		// Check cookies to see if we have saved the summoner and region
+		//
+		if ( readCookie('last_summoner') ){
+			cookie_data = readCookie('last_summoner').split(',');
+			// Set Summoner name
+			document.querySelector('.summoners-input').value = cookie_data[0];
+			// Set region
+			region_txt.innerHTML = cookie_data[1];
+			for( var i=0; i<regions.length; i++ ){
+				// Styles of custom select
+				if (regions[i].innerHTML == cookie_data[1]){
+					regions[i].setAttribute('class','c');
+				}else{
+					regions[i].setAttribute('class','');
+				}
+			}
+		}
+
+	</script>	
+{% endcomment %}	
+{% endblock javascript %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

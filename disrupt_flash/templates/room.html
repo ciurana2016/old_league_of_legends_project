@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block socketjs %}
+	{# HackTimer (minimized windows) #}
+	<script src="{% static 'js/hacktimer/HackTimer.min.js' %}"></script>
+	{# Fuzzy text #}
+	<script src="{% static 'js/fuzzyset/fuzzyset.js' %}"></script>
+	{# Sockets #}
+	{% if '8000' in request.META.HTTP_HOST %}
+		<script src="http://127.0.0.1:3000/socket.io/socket.io.js"></script>
+	{% else %}
+		<script src="https://www.disruptflash.com:3000/socket.io/socket.io.js"></script>
+	{% endif %}
+	
+	{% if '8000' in request.META.HTTP_HOST %}
+		<script>var socket = io.connect('http://'+window.location.hostname+':3000');</script>	
+	{% else %}
+		<script>var socket = io.connect('https://'+window.location.hostname+':3000');</script>
+	{% endif %}
+
+{% endblock socketjs %}
+
+{% block content %}
+	
+	{# Popup, for QR code #}
+	<div class="black"></div>
+	<div class="popup">
+		<div class="close_me">
+			<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1490 1322q0 40-28 68l-136 136q-28 28-68 28t-68-28l-294-294-294 294q-28 28-68 28t-68-28l-136-136q-28-28-28-68t28-68l294-294-294-294q-28-28-28-68t28-68l136-136q28-28 68-28t68 28l294 294 294-294q28-28 68-28t68 28l136 136q28 28 28 68t-28 68l-294 294 294 294q28 28 28 68z"/></svg>
+		</div>
+		<div class="qr_img"></div>
+	</div>
+
+	<section id="room">
+		<div class="center">
+
+			<div id="config">
+				<div class="qr button" data-img="{{room.qr}}">
+					<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M576 1152v128h-128v-128h128zm0-768v128h-128v-128h128zm768 0v128h-128v-128h128zm-1024 1023h384v-383h-384v383zm0-767h384v-384h-384v384zm768 0h384v-384h-384v384zm-256 256v640h-640v-640h640zm512 512v128h-128v-128h128zm256 0v128h-128v-128h128zm0-512v384h-384v-128h-128v384h-128v-640h384v128h128v-128h128zm-768-768v640h-640v-640h640zm768 0v640h-640v-640h640z"/></svg>
+				</div>
+				<div class="button fullscreen">Fullscreen</div>
+				<input type="checkbox" id="voice_toggle">
+				<label class="voice_recognition button" for="voice_toggle">
+					<span class="on">
+						<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M463 945l-101 101q-42-103-42-214v-128q0-26 19-45t45-19 45 19 19 45v128q0 53 15 113zm1114-602l-361 361v128q0 132-94 226t-226 94q-55 0-109-19l-96 96q97 51 205 51 185 0 316.5-131.5t131.5-316.5v-128q0-26 19-45t45-19 45 19 19 45v128q0 221-147.5 384.5t-364.5 187.5v132h256q26 0 45 19t19 45-19 45-45 19h-640q-26 0-45-19t-19-45 19-45 45-19h256v-132q-125-13-235-81l-254 254q-10 10-23 10t-23-10l-82-82q-10-10-10-23t10-23l1234-1234q10-10 23-10t23 10l82 82q10 10 10 23t-10 23zm-380-132l-621 621v-512q0-132 94-226t226-94q102 0 184.5 59t116.5 152z"/></svg>
+					</span>
+					<span class="off">
+						<svg viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1472 704v128q0 221-147.5 384.5t-364.5 187.5v132h256q26 0 45 19t19 45-19 45-45 19h-640q-26 0-45-19t-19-45 19-45 45-19h256v-132q-217-24-364.5-187.5t-147.5-384.5v-128q0-26 19-45t45-19 45 19 19 45v128q0 185 131.5 316.5t316.5 131.5 316.5-131.5 131.5-316.5v-128q0-26 19-45t45-19 45 19 19 45zm-256-384v512q0 132-94 226t-226 94-226-94-94-226v-512q0-132 94-226t226-94 226 94 94 226z"/></svg>
+					</span>						
+				</label>
+				<div class="voice_processing">(Champion Name) + 'used' + (Spell Name)</div>
+			</div>
+			
+			{# Game yet to start #}
+			{% if not enemy_team %}
+				<div class="no_start">
+					<h3>The game hasn't started yet, click the button when it does.</h3>
+					<button class="match_start">Game started !</button>
+				</div>
+			{% endif %}
+			
+			{# Hhere will to the eney team #}
+			<ul class="enemy_team"></ul>
+
+			{# Delete this room #}
+			{% if can_close_room %}
+				<div class="close_room">This room will last 1 hour or unitl you close it. <br>Summoners can't have more than one room opened at once.<a href="{% url 'close_room' %}">Close this room</a>
+				</div>				
+			{% endif %}
+
+		</div>
+	</section>
+	
+{% endblock content %}
+
+{% block javascript %}
+<script>var msg=new SpeechSynthesisUtterance;window.speechSynthesis.onvoiceschanged=function(){voices=window.speechSynthesis.getVoices();for(var a=0;a<voices.length;a++)"en-US"==voices[a].lang&&(msg.voice=voices[a])};msg.lang="en-US";msg.volume=1;msg.rate=1;msg.pitch=1;var define_time=function(a){return 60<a?(minutes=Math.floor(a/60),seconds=a-60*minutes,1==seconds.toString().length&&(seconds="0"+seconds),minutes+":"+seconds):a+"s"},CD_FUNCTION=function(a,b,c,d,e,g){a.setAttribute("data-disabled","1");var h=a.querySelector(".cd_counter"),k=a.querySelector("svg");e||(g=e=314/b);h?(h.innerHTML=define_time(b),a.querySelector("svg circle").style.strokeDashoffset=e.toString()):(counter=document.createElement("div"),counter.className="cd_counter",counter.innerHTML=define_time(b),a.appendChild(counter),a.innerHTML+='<svg><circle cx="50%" cy="50%" r="50%"></circle></svg>');0<b?setTimeout(function(){CD_FUNCTION(a,b-1,c,d,e+g,g)},1E3):(msg.text=d+"'s, "+c+", is up!",speechSynthesis.speak(msg),a.removeChild(h),a.removeChild(k),a.setAttribute("data-disabled","0"));return!1};socket.emit("ADD_summoner","{{room.slug}}");var IO_MATCH_start=function(){socket.emit("IO_MATCH_start");return!1};socket.on("RECEIVE_match_start",function(){window.location=window.location});var SEND_spell=function(a){socket.emit("SEND_spell",a);return!1};socket.on("RECEIVE_spell",function(a){element=document.getElementById(a.cname);CD_FUNCTION(element.querySelector("."+a.name),a.cd,a.name,a.cname);"Draven"==a.cname&&(a.cname="Dreven");"Teemo"==a.cname&&(a.cname="Timo");msg.text=a.cname+" ( used )"+a.name;speechSynthesis.speak(msg)});var CLOSE_room=function(){socket.emit("CLOSE_room");return!1};socket.on("RECEIVE_close_room",function(){socket.emit("REMOVE_me");alert("The room admin has closed the room");window.location="/"});try{cr=document.querySelector(".close_room"),cr.querySelector(".close_room a").addEventListener("click",function(a,b){a.preventDefault();CLOSE_room();window.location=this.getAttribute("href")}),cr.innerHTML="<b>Share this url with your teammates:</b><br>"+window.location.href+"<br><br>"+cr.innerHTML}catch(a){}var _function_spells=function(){spells=document.querySelectorAll(".spell");_spell_click=function(a){a.addEventListener("click",function(){if("1"!==a.getAttribute("data-disabled"))a.setAttribute("data-disabled","1");else return!1;CD_FUNCTION(a,a.getAttribute("data-cd"),a.getAttribute("data-name"),a.getAttribute("data-cname"));SEND_spell({cd:a.getAttribute("data-cd"),name:a.getAttribute("data-name"),cname:a.getAttribute("data-cname")});return!1})};for(var a=0;a<spells.length;a++)_spell_click(spells[a]),spells[a].setAttribute("data-disabled","0");return!1},ul=document.querySelector(".enemy_team"),et='{{enemy_team|safe}}',fuzzy_names=FuzzySet(),fuzzy_spells=FuzzySet(),fuzzy_actinos=FuzzySet(),build_enemy_team=function(a){enemy_team=JSON.parse(a);for(champion in enemy_team)a=function(a,c,d,e,g){spell=document.createElement("div");spell.setAttribute("class","spell img "+d);spell.setAttribute("data-name",d);spell.setAttribute("data-cname",e);spell.style.background='url({% static "img/spell/" %}'+a+".png)";1==g&&(c-=Math.round(.15*c));spell.setAttribute("data-cd",c);enemy.appendChild(spell);fuzzy_spells.add(d);fuzzy_actinos.add(e+" used "+d)},fuzzy_names.add(enemy_team[champion].name),enemy=document.createElement("li"),enemy.className="enemy",enemy.setAttribute("id",enemy_team[champion].name),champion_div=document.createElement("div"),champion_div.setAttribute("class","champion img"),champion_div.style.background='url({% static "img/champion/" %}'+champion+".png)",enemy.appendChild(champion_div),a(enemy_team[champion].spell_1.id,enemy_team[champion].spell_1.cd,enemy_team[champion].spell_1.name,enemy_team[champion].name,enemy_team[champion].insight_mastery),a(enemy_team[champion].spell_2.id,enemy_team[champion].spell_2.cd,enemy_team[champion].spell_2.name,enemy_team[champion].name,enemy_team[champion].insight_mastery),ul.appendChild(enemy);_function_spells();return!1};et&&"404"!==et&&build_enemy_team(et);btn_start=document.querySelector(".match_start");var rate_limit=0;btn_start&&btn_start.addEventListener("click",function(){10==rate_limit?alert("The match hasnt started yet, please w8 10 seconds to try again"):(request=new XMLHttpRequest,request.open("GET",window.location.origin+"/welcome_to_te_league_of_draven/?r={{room.slug}}",!0),request.onload=function(){200<=request.status&&400>request.status?(build_enemy_team(request.responseText),document.querySelector(".no_start").remove(),IO_MATCH_start()):(alert("The match hasnt started yet, please w8 10 seconds to try again"),rate_limit=10,setTimeout(function(){rate_limit=0},1E4))},request.send())});document.querySelector(".qr").addEventListener("click",function(){document.querySelector(".black").style.display="block";qr_image=this.getAttribute("data-img");popup=document.querySelector(".popup");popup.style.display="block";popup.querySelector(".qr_img").style.background="url("+window.location.origin+"/"+qr_image+") no-repeat center center / cover"});var close_qr=function(){document.querySelector(".popup").style.display="none";document.querySelector(".black").style.display="none"};document.querySelector(".close_me").addEventListener("click",function(){close_qr()});document.querySelector(".black").addEventListener("click",function(){close_qr()});var btn_togglescreen=document.querySelector(".fullscreen");function toggleFullScreen(){document.fullscreenElement||document.mozFullScreenElement||document.webkitFullscreenElement||document.msFullscreenElement?(document.exitFullscreen?document.exitFullscreen():document.msExitFullscreen?document.msExitFullscreen():document.mozCancelFullScreen?document.mozCancelFullScreen():document.webkitExitFullscreen&&document.webkitExitFullscreen(),btn_togglescreen.innerHTML="Fullscreen"):(document.documentElement.requestFullscreen?document.documentElement.requestFullscreen():document.documentElement.msRequestFullscreen?document.documentElement.msRequestFullscreen():document.documentElement.mozRequestFullScreen?document.documentElement.mozRequestFullScreen():document.documentElement.webkitRequestFullscreen&&document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT),btn_togglescreen.innerHTML="Exit Fullscreen")}btn_togglescreen.addEventListener("click",function(){toggleFullScreen()});window.SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition||null;if(null===window.SpeechRecognition)update();else{var recognizer=new window.SpeechRecognition;recognizer.continuous=!0;recognizer.lang="en-US";recognizer.interimResults=!0;var t="",btn_voice=document.querySelector("#voice_toggle"),voice_processing=document.querySelector(".voice_processing"),voice_state=!1,_toggle_voice=function(){0==voice_state?(voice_processing.style.display="inline-block",recognizer.start(),voice_state=!0):(voice_state=!1,recognizer.stop(),voice_processing.style.display="none",voice_processing.style.color="#2e2e2e",voice_processing.innerHTML="(Champion Name) + 'used' + (Spell Name)")};btn_voice.addEventListener("click",function(){_toggle_voice()});recognizer.onresult=function(a){for(var b=a.resultIndex;b<a.results.length;b++)a.results[b].isFinal?2<=a.results[b][0].transcript.split(" ").length&&(f=fuzzy_actinos.get(a.results[b][0].transcript)[0][1],voice_processing.style.color="rgb(100,200,100)",voice_processing.innerHTML=f,champion_name=f.split(" ")[0],champion_spell=f.split(" ")[2],champion=document.getElementById(champion_name),spell=champion.querySelector("."+champion_spell),0==spell.getAttribute("data-disabled")&&(CD_FUNCTION(spell,spell.getAttribute("data-cd"),spell.getAttribute("data-name"),spell.getAttribute("data-cname")),SEND_spell({cd:spell.getAttribute("data-cd"),name:spell.getAttribute("data-name"),cname:spell.getAttribute("data-cname")}))):(voice_processing.style.color="rgb(200,100,100)",voice_processing.innerHTML=a.results[b][0].transcript)};recognizer.onend=function(a){1==voice_state&&recognizer.start()}};</script>
+
+
+{% comment %}
+	{# CD FUNCTIONALITY #}
+	<script>
+
+		//
+		//	THE CD FUNCTIONALITY , TIMER, SPEECH, SOCKETS
+		//
+
+		// Setting up Voice Synthesis
+		var msg = new SpeechSynthesisUtterance();
+
+		// This just loads the Correct English voice in all devices.
+		// If you have a phone that is ( for example ) in spanish
+		// and is ( for example ) a samsung, It will make you download 
+		// the english TTS manually.
+		window.speechSynthesis.onvoiceschanged = function() {
+			voices = window.speechSynthesis.getVoices();
+			for ( var i=0; i<voices.length; i++ ){
+				if ( voices[i]['lang'] == 'en-US'  ){
+					msg.voice = voices[i];
+				}
+			}
+		};
+
+		msg.lang = 'en-US';
+		msg.volume = 1; // 0 to 1
+		msg.rate = 1; // 0.1 to 10  (how fast)
+		msg.pitch = 1; //0 to 2 
+
+		var define_time = function(time){
+			if ( time > 60 ){
+				minutes = Math.floor(time/60);
+				seconds = time - minutes * 60;
+				if (seconds.toString().length == 1){
+					seconds = '0' + seconds
+				}
+				return minutes + ':' + seconds
+			}else{
+				return time + 's'
+			}
+		}
+
+		var CD_FUNCTION = function(el, time, name, cname, d ,m){
+			
+			el.setAttribute('data-disabled', '1');
+
+			// Creates a tiking "clock" (with cd time)
+			var try_counter = el.querySelector('.cd_counter');
+			var svg = el.querySelector('svg');
+
+			if(!d){
+				d = 314/time;
+				m = d;
+			}
+
+			if ( try_counter ){
+				try_counter.innerHTML = define_time(time);
+				el.querySelector('svg circle').style.strokeDashoffset = d.toString();
+			}else{
+				counter = document.createElement('div');
+				counter.className = 'cd_counter';
+				counter.innerHTML = define_time(time);
+				el.appendChild( counter );
+				// The cooldwon game-like thing (svg)
+				el.innerHTML += '<svg><circle cx="50%" cy="50%" r="50%"></circle></svg>';
+			}
+
+			// Re-activatin myself if the cd is still counting
+			if( time > 0 ){
+				setTimeout(function(){
+					CD_FUNCTION(el, time - 1, name, cname, d + m, m)
+				}, 1000)					
+			}else{
+				// Summoners is up again
+				// msg.text = cname+"'s "+name+', is up again';
+				msg.text = cname+"'s, "+name+', is up!';
+				speechSynthesis.speak(msg);
+
+				// Remove the element
+				el.removeChild( try_counter );
+				el.removeChild( svg )
+
+				// Set clickable again
+				el.setAttribute('data-disabled', '0');
+			}
+
+			// ;)
+			return false
+		}
+	</script>
+
+	{# SOCKET IO COMUNICATION #}
+	<script>
+
+		// Automatically on entering you get inside the room
+		socket.emit('ADD_summoner', '{{room.slug}}');
+
+		// Sends message to the members of the room that the game started
+		var IO_MATCH_start = function(){
+			socket.emit('IO_MATCH_start');
+			return false
+		}
+
+		// Receiving signal that match started (just reload page)
+		socket.on('RECEIVE_match_start', function(){
+			window.location = window.location;
+		});
+
+		// Function for sending spells
+		var SEND_spell = function(data){
+			socket.emit('SEND_spell', data);
+			return false
+		}
+
+		// Receiving spells from others on room
+		socket.on('RECEIVE_spell', function(data){
+			element = document.getElementById(data['cname']);
+			CD_FUNCTION(
+				element.querySelector('.'+data['name']),
+				data['cd'],
+				data['name'],
+				data['cname']
+			);
+			// SPELL IT !
+
+			// Some fixed
+			if ( data['cname'] == 'Draven' ){ data['cname'] = 'Dreven' }
+			// if ( data['cname'] == 'Teemo' ){ data['cname'] = 'Satanic monster Timo' }
+			if ( data['cname'] == 'Teemo' ){ data['cname'] = 'Timo' }
+
+			msg.text = data['cname'] + ' ( used )' + data['name'];
+			speechSynthesis.speak(msg);
+		});
+
+		// Send signal to close the room
+		var CLOSE_room = function(){
+			socket.emit('CLOSE_room');
+			return false
+		};
+
+		// Receiving signal to close the room
+		socket.on('RECEIVE_close_room', function(){
+			socket.emit('REMOVE_me');
+			alert('The room admin has closed the room');
+			window.location = '/'
+		});
+	</script>
+
+	{# Closing the room #}
+	<script>
+		try{
+			cr = document.querySelector('.close_room');
+			cr.querySelector('.close_room a')
+				.addEventListener('click', function(event, element){
+					event.preventDefault();
+					// Close room for all summoners
+					CLOSE_room();
+					window.location = this.getAttribute('href');
+				});
+			cr.innerHTML = '<b>Share this url with your teammates:</b><br>'
+			+ window.location.href + '<br><br>' + cr.innerHTML;
+		}catch(e){}
+	</script>
+
+	{# HTML RENDERING #}
+	<script>
+
+		// CREATE HTML AND ADD CLICK TO THE SPELLS
+
+		//
+		// ADD Functionality to the spells (click)
+		//
+
+		var _function_spells = function(){
+
+			// Adding click to spells
+
+			spells = document.querySelectorAll('.spell');
+
+			_spell_click = function(el){
+				el.addEventListener('click', function(){
+					
+					// First check if it is already on cooldown
+					if( el.getAttribute('data-disabled') !== '1' ){
+						el.setAttribute('data-disabled', '1');
+					}else{ return false }
+
+					// Create CD_FUNCTION
+					CD_FUNCTION(
+						el,
+						el.getAttribute('data-cd'),
+						el.getAttribute('data-name'),
+						el.getAttribute('data-cname')
+					);
+
+					// Sending CD_FUNCTION data to the other members of our room
+					SEND_spell({
+						'cd' : el.getAttribute('data-cd'),
+						'name' : el.getAttribute('data-name'),
+						'cname' : el.getAttribute('data-cname')
+					});
+
+					return false
+
+				});
+			};
+
+			for( var i=0; i<spells.length; i++ ){
+				_spell_click(spells[i]);
+				spells[i].setAttribute('data-disabled','0');
+			}
+
+			// End [ adding click to spells ]
+			return false
+		};
+
+		//
+		// Build the HTML
+		//
+
+		var ul = document.querySelector('.enemy_team');
+		var et = '{{enemy_team|safe}}';
+
+		// Fuzzy for speechRecognition
+		var fuzzy_names = FuzzySet();
+		var fuzzy_spells = FuzzySet();
+		var fuzzy_actinos = FuzzySet();
+
+		var build_enemy_team = function(enemy_data){
+			enemy_team = JSON.parse(enemy_data);
+			for ( champion in enemy_team ){
+				// We save the champion on Fuzzy to get estimate strings
+				// agains it so we can "know" what the user was trying to say
+				fuzzy_names.add(enemy_team[champion]['name']);
+
+				// li
+				enemy = document.createElement('li');
+				enemy.className = 'enemy';
+				enemy.setAttribute('id', enemy_team[champion]['name'] );
+
+				// champ
+				champion_div = document.createElement('div');
+				champion_div.setAttribute('class','champion img');
+				champion_div.style.background = 'url({% static "img/champion/" %}'+champion+'.png)';
+				enemy.appendChild(champion_div)
+
+				// Spells
+				function create_spell(id, cd, name, cname, master){
+					spell = document.createElement('div');
+					spell.setAttribute('class','spell img '+name);
+					spell.setAttribute('data-name', name);
+					spell.setAttribute('data-cname', cname);
+					spell.style.background = 'url({% static "img/spell/" %}'+id+'.png)';
+					// Timer ( Insight Mastery, resolve tree )
+					if( master == true ){ cd -= Math.round((15/100) * cd)}
+					spell.setAttribute('data-cd', cd);
+					enemy.appendChild(spell)
+
+					// Save the spell name in Fuzzy list
+					fuzzy_spells.add(name);
+					// Save complete action
+					fuzzy_actinos.add(cname+' used '+name);
+				}
+				create_spell(
+					enemy_team[champion]['spell_1']['id'],
+					enemy_team[champion]['spell_1']['cd'],
+					enemy_team[champion]['spell_1']['name'],
+					enemy_team[champion]['name'],
+					enemy_team[champion]['insight_mastery']
+					)
+				create_spell(
+					enemy_team[champion]['spell_2']['id'],
+					enemy_team[champion]['spell_2']['cd'],
+					enemy_team[champion]['spell_2']['name'],
+					enemy_team[champion]['name'],
+					enemy_team[champion]['insight_mastery']
+					)
+				// Append to ul
+				ul.appendChild(enemy);
+			}
+			_function_spells();
+			return false
+		};
+
+		// If we have the data already here
+		if( et && et !== '404' ){ build_enemy_team(et) };
+
+		// Manually build the html ( button )
+		btn_start = document.querySelector('.match_start');
+
+		// Rate limit w8 10s (if match has not started)
+		var rate_limit = 0;
+
+		if ( btn_start ){
+			btn_start.addEventListener('click', function(){
+				// If spam
+				if( rate_limit == 10 ){
+					alert('The match hasnt started yet, please w8 10 seconds to try again')
+				}else{
+					// If no spam
+					request = new XMLHttpRequest();
+					request.open('GET', window.location.origin+'/welcome_to_te_league_of_draven/?r={{room.slug}}', true);
+					request.onload = function(){
+						if( request.status >= 200 && request.status < 400 ){
+							build_enemy_team(request.responseText);
+							document.querySelector('.no_start').remove();
+							// Sends signal to the other summoners to build
+							// the enemy_team html on theyr browsers too
+							IO_MATCH_start();
+						}else{
+							alert('The match hasnt started yet, please w8 10 seconds to try again');
+							rate_limit = 10;
+							setTimeout(function(){ rate_limit = 0 },10000);
+						}
+					}
+					request.send()					
+				}
+
+			});			
+		}
+	</script>
+
+	{# QR CODE #}
+	<script>
+		// Show QR
+		document.querySelector('.qr')
+			.addEventListener('click', function(){
+				document.querySelector('.black')
+					.style.display = 'block';
+				qr_image = this.getAttribute('data-img');
+				popup = document.querySelector('.popup');
+				popup.style.display = 'block';
+				popup.querySelector('.qr_img')
+					.style.background = 'url('+window.location.origin+'/'+qr_image+') no-repeat center center / cover';
+			});
+		// Close QR
+		var close_qr = function(){
+			document.querySelector('.popup')
+				.style.display = 'none';
+			document.querySelector('.black')
+				.style.display = 'none'
+		}
+		document.querySelector('.close_me')
+			.addEventListener('click', function(){
+				close_qr()
+			});
+		document.querySelector('.black')
+			.addEventListener('click', function(){
+				close_qr()
+			});
+	</script>
+
+	{# FULSCREEN #}
+	<script>
+		var btn_togglescreen = document.querySelector('.fullscreen');
+
+	    // https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
+		function toggleFullScreen() {
+		  if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) { 
+		    if (document.documentElement.requestFullscreen) {
+		      document.documentElement.requestFullscreen();
+		    } else if (document.documentElement.msRequestFullscreen) {
+		      document.documentElement.msRequestFullscreen();
+		    } else if (document.documentElement.mozRequestFullScreen) {
+		      document.documentElement.mozRequestFullScreen();
+		    } else if (document.documentElement.webkitRequestFullscreen) {
+		      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+		    }
+		    btn_togglescreen.innerHTML = 'Exit Fullscreen'
+		  } else {
+		    if (document.exitFullscreen) {
+		      document.exitFullscreen();
+		    } else if (document.msExitFullscreen) {
+		      document.msExitFullscreen();
+		    } else if (document.mozCancelFullScreen) {
+		      document.mozCancelFullScreen();
+		    } else if (document.webkitExitFullscreen) {
+		      document.webkitExitFullscreen();
+		    }
+		     btn_togglescreen.innerHTML = 'Fullscreen'
+		  }
+		}
+
+		btn_togglescreen.addEventListener('click', function(){
+			toggleFullScreen();
+		});
+	</script>
+
+	{# VOICE RECOGNITION #}
+	<script>
+
+		window.SpeechRecognition = window.SpeechRecognition 	  ||
+								   window.webkitSpeechRecognition ||
+								   null;
+
+		if( window.SpeechRecognition === null ){
+			update();
+		}else{
+
+			// Config API
+			var recognizer = new window.SpeechRecognition();
+
+			recognizer.continuous = true;
+			recognizer.lang = 'en-US';
+			recognizer.interimResults = true;
+
+			// Current txt
+			var t = '';
+
+			// Toggling the button and stuff
+			var btn_voice = document.querySelector('#voice_toggle');
+			var voice_processing = document.querySelector('.voice_processing');
+			var voice_state = false;
+
+			// The voice API (toggling start stop)
+			var _toggle_voice = function(){
+				if( voice_state == false ){
+					voice_processing.style.display = 'inline-block';
+					recognizer.start();
+					voice_state = true;
+				}else{
+					voice_state = false;
+					recognizer.stop();
+					voice_processing.style.display = 'none';
+					voice_processing.style.color = "#2e2e2e";	
+					voice_processing.innerHTML = "(Champion Name) + 'used' + (Spell Name)";
+				}
+			}
+
+			btn_voice.addEventListener('click', function(){
+				_toggle_voice();
+			});
+
+			// Recognice stuff
+			recognizer.onresult = function(event){
+				for( var i=event.resultIndex; i < event.results.length; i++ ){
+					// If the transcirption is "Final", we execute the command
+					if( event.results[i].isFinal ){
+						// If we have 2 ore more words
+						// console.log(event.results[i][0].transcript, 'final', event.results[i][0].confidence, new Date);
+						if( event.results[i][0].transcript.split(' ').length >=2 ){
+							f = fuzzy_actinos.get(event.results[i][0].transcript)[0][1];
+							// Change the html to the user transcirpt preview
+							voice_processing.style.color = "rgb(100,200,100)";
+							voice_processing.innerHTML = f;
+							// Select the correct html
+							champion_name = f.split(' ')[0]
+							champion_spell = f.split(' ')[2]
+							champion = document.getElementById(champion_name);
+							spell = champion.querySelector('.'+champion_spell);
+							// Fire action !
+							// Create CD_FUNCTION
+							if( spell.getAttribute('data-disabled') == 0 ){
+								CD_FUNCTION(
+									spell,
+									spell.getAttribute('data-cd'),
+									spell.getAttribute('data-name'),
+									spell.getAttribute('data-cname')
+								);
+								// Sending CD_FUNCTION data to the other members of our room
+								SEND_spell({
+									'cd' : spell.getAttribute('data-cd'),
+									'name' : spell.getAttribute('data-name'),
+									'cname' : spell.getAttribute('data-cname')
+								});								
+							}
+							// console.log('F F=', f, ' f t = ',event.results[i][0].transcript, new Date);
+						}
+					}else{
+						// console.log(event.results[i][0].transcript, 'nofinal', event.results[i][0].confidence, new Date);
+						// Sometimes it keeps on listenening and the transcription is never final
+						voice_processing.style.color = "rgb(200,100,100)";
+						voice_processing.innerHTML = event.results[i][0].transcript;
+
+						// if( event.results[i][0].confidence >= 0.8
+						// 	&& event.results[i][0].transcript.split(' ').length >=3 ){
+						// 	f = fuzzy_actinos.get(event.results[i][0].transcript)[0][1];
+						// 	console.log('SHIT JUST GOT REAL ! up here ! lenght=', event.results[i][0].transcript.split(' ').length, event.results[i][0].transcript);
+						// 	console.log('SHIT F=', f, new Date);
+						// }
+						// TODO if we have 3 words with more than 80% accuracy we fire command even if is not final
+						// Or somethimes we have like 10seconds delay, in game this is frustrating
+					}
+				}
+			};
+
+			// Restart the recognizer if it stops by itself
+			recognizer.onend = function(event){
+				if ( voice_state == true ){
+					recognizer.start();
+				}
+				// console.log('The recognizer ended !')
+			}
+
+			// TESTS
+			// recognizer.onspeechend = function(event){
+			// 	console.log('ON SPEECH END');
+			// }
+			// recognizer.onsoundend = function(event){
+			// 	console.log('ON SOUND END');
+			// }
+			// recognizer.onaudioend = function(event){
+			// 	console.log('ON AUDIO END');
+			// }
+			
+			// recognizer.onerror = function(event){
+			// 	console.log('Recoginicer Error: ', event.error);
+			// 	// recognizer.stop(); recognizer.start();
+			// }
+
+
+		} // End SpeechRecognition null else
+
+	</script>	
+{% endcomment %}	
+{% endblock javascript %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
